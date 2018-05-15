@@ -7,6 +7,8 @@
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
 // | Author: 麦当苗儿 <zuojiazi@vip.qq.com> <http://www.zjzit.cn>
+// +----------------------------------------------------------------------| 
+//   modify: zhangx <zhangxin828@foxmailcom> 
 // +----------------------------------------------------------------------
 
 namespace common\library;
