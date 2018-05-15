@@ -36,6 +36,7 @@ class Verify
 
     private $_image = null; // 验证码图片实例
     private $_color = null; // 验证码字体颜色
+    private $memcache = null; //memcache
 
     /**
      * 架构方法 设置参数
@@ -45,6 +46,9 @@ class Verify
     public function __construct($config = array())
     {
         $this->config = array_merge($this->config, $config);
+        //初始memcache
+        $mem = new Memcache(); 
+        $this->memcache = $mem->connect('127.0.0.1',11211);
     }
 
     /**
@@ -95,7 +99,7 @@ class Verify
         $key = $this->authcode($this->seKey) . $id;
         //兼容pc app处理
         if ($id){
-            $secode =  Yii::$app->cache->getMemcache()->get($key);
+            $secode =  $this->memcache->get($key);
             // 验证码不能为空
             if (empty($code) || empty($secode)) {
                 return false;
@@ -103,12 +107,12 @@ class Verify
             // memcache 过期
             $now = time();
             if ($now - $secode['verify_time'] > $this->expire) {
-                Yii::$app->cache->getMemcache()->set($key, null);
+                $this->memcache->set($key, null);
                 return false;
             }
 
             if ($this->authcode(strtoupper($code)) == $secode['verify_code']) {
-                $this->reset && Yii::$app->cache->getMemcache()->set($key, null);
+                $this->reset && $this->memcache->set($key, null);
                 return true;
             }
         }else{
@@ -209,7 +213,7 @@ class Verify
         $secode['verify_time'] = time(); // 验证码创建时间
         //兼容pc app处理
         if ($id){
-            Yii::$app->cache->getMemcache()->set($key.$id,$secode,MEMCACHE_COMPRESSED,1800);
+            $this->memcache->set($key.$id,$secode,MEMCACHE_COMPRESSED,1800);
         }else{
             Yii::$app->session->set($key . $id, $secode);
         }
